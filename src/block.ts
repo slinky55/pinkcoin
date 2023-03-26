@@ -1,5 +1,6 @@
 import CryptoJS from "crypto-js";
-import { findBlock } from "./pow.js";
+import { findBlock, getAccumDifficulty, getDifficulty } from "./pow.js";
+import { checkHash, checkTimestamp, currentTimestamp } from "./util.js";
 
 const genesis: Block = {
     idx: 0,
@@ -42,7 +43,7 @@ export function genHash(
 
 export function genHashFromBlock(block: Block): string | null {
     return CryptoJS.SHA256(
-        block.idx + block.prevHash + block.timestamp + block.data
+        block.idx + block.prevHash + block.timestamp + block.data + block.difficulty + block.nonce
     ).toString();
 }
 
@@ -50,12 +51,24 @@ export function checkBlock(block: Block, prev: Block): boolean {
     if (prev.idx + 1 !== block.idx) {
         console.log("Check block failed, invalid index!");
         return false;
-    } else if (prev.hash !== block.prevHash) {
+    }
+    if (prev.hash !== block.prevHash) {
         console.log("Check block failed, invalid previous hash!");
         return false;
-    } else if (genHashFromBlock(block) !== block.hash) {
+    }
+
+    if (genHashFromBlock(block) !== block.hash) {
         console.log("Check block failed, invalid hash!");
         return false;
+    }
+
+    if (!checkTimestamp(block, prev)) {
+        console.log("Check block failed, invalid timestamp");
+        return false;
+    }
+
+    if (!checkHash(block)) {
+        console.log("Check block failed, failed to validate hash");
     }
 
     return true;
@@ -86,7 +99,9 @@ export function checkChain(chain: Block[]): boolean {
 }
 
 export function replaceChain(chain: Block[]): void {
-    if (checkChain(chain) && chain.length > blockchain.length) {
+    if (checkChain(chain) &&
+        chain.length > blockchain.length &&
+        getAccumDifficulty(chain) > getAccumDifficulty(blockchain)) {
         blockchain = chain;
     } else {
         console.log("failed to replace, invalid chain");
@@ -106,9 +121,9 @@ export function addBlock(block: Block): boolean {
 export function generateBlock(data: string): Block | null {
     const prevBlock: Block = latestBlock();
     const idx: number = prevBlock.idx + 1;
-    const timestamp: number = new Date().getTime() / 1000;
+    const timestamp: number = currentTimestamp();
     
-    const block: Block = findBlock(idx, prevBlock.hash, timestamp, data, latestBlock().difficulty);
+    const block: Block = findBlock(idx, prevBlock.hash, timestamp, data, getDifficulty(blockchain));
 
     if (!addBlock(block)) return null;
 

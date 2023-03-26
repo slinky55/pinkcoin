@@ -1,4 +1,5 @@
-import { Block } from "./block.js";
+import { Block, genHash, genHashFromBlock } from "./block.js";
+import { checkDifficulty, getDifficulty } from "./pow.js";
 
 const lookupTable = {
     '0': '0000', '1': '0001', '2': '0010', '3': '0011', '4': '0100',
@@ -30,4 +31,19 @@ export const toBitString = (s: string): string => {
 export function checkTimestamp(block: Block, prev: Block): boolean {
     return ( prev.timestamp - 60 < block.timestamp )
         && block.timestamp - 60 < currentTimestamp();
+}
+
+export function checkHash(block: Block): boolean {
+    const hash: string = genHashFromBlock(block);
+    if (hash !== block.hash) {
+        console.log("check hash failed, invalid hash");
+        return false;
+    }
+
+    if (!checkDifficulty(block.hash, block.difficulty)) {
+        console.log("check hash failed, invalid difficulty");
+        return false;
+    }
+
+    return true;
 }
