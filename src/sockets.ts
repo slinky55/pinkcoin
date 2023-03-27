@@ -59,7 +59,6 @@ export function connectToPeer(p: string): void {
     ws.on("open", () => {
         console.log("Connected to node at: " + p);
         initSocket(ws);
-        write(ws, QueryChain());
     });
 
     ws.on("error", () => {
