@@ -3,6 +3,7 @@ import { WebSocketServer } from "ws";
 import Server from "ws";
 
 import { Block, addBlock, blockchain, checkBlockTypes, checkChain, latestBlock, replaceChain } from "./block.js";
+import { JSONToObject } from "./util.js";
 
 export const peers: WebSocket[] = [];
 
@@ -68,7 +69,7 @@ function initSocket(ws: WebSocket) {
     peers.push(ws);
 
     ws.on("message", (data: string) => {
-        const message: Message = JSON.parse(data);
+        const message: Message = JSONToObject<Message>(data);
         if (!message) {
             console.log("Failed to receive message from: " +  ws.url);
             return;
