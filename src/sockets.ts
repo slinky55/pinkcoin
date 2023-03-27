@@ -21,7 +21,14 @@ export type Message = {
 export function LatestMessage(): Message {
     return {
         type: MessageType.I_LATEST,
-        data: [latestBlock()]
+        data: [latestBlock()],
+    }
+}
+
+export function ChainMessage(): Message {
+    return {
+        type: MessageType.I_BLOCKCHAIN,
+        data: blockchain,
     }
 }
 

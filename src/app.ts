@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyparser from 'body-parser';
 
-import { LatestMessage, broadcast, connectToPeer, initP2P, peers } from './sockets.js';
+import { ChainMessage, LatestMessage, broadcast, connectToPeer, initP2P, peers } from './sockets.js';
 
 import { Block, generateBlock } from './block.js';
 import { blockchain } from "./block.js";
@@ -16,7 +16,7 @@ app.get("/blocks", (req, res) => {
 
 app.post("/blocks", (req, res) => {
   const block: Block = generateBlock(req.body.data);
-  broadcast(LatestMessage());
+  broadcast(ChainMessage());
   res.send(block);
 });
 
@@ -29,7 +29,7 @@ app.get("/peers", (req, res) => {
 
 app.post("/peers", (req, res) => {
   connectToPeer(req.body.peer);
-  res.send();
+  res.send(req.body.peer);
 });
 
 initP2P();
