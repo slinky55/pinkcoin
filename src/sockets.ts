@@ -22,7 +22,7 @@ export type Message = {
 export function SendLatest(): Message {
     return {
         type: MessageType.I_LATEST,
-        data: [latestBlock()],
+        data: latestBlock(),
     }
 }
 
@@ -113,9 +113,11 @@ function initSocket(ws: WebSocket) {
                 if (bc.length > blockchain.length) {
                     if (localLatest.hash === recLatest.prevHash) {
                         if (addBlock(recLatest)) {
+                            console.log("received new block from " + ws.url);
                             broadcast(SendLatest())
                         }
                     } else {
+                        console.log("received new chain from " + ws.url);
                         replaceChain(bc);
                         broadcast(SendLatest())
                     }
@@ -124,25 +126,17 @@ function initSocket(ws: WebSocket) {
                 break;
 
             case MessageType.I_LATEST:
-                const latest: Block[] = message.data;
+                const latest: Block = message.data;
 
-                if (!bc || bc.length === 0) {
-                    console.log("invalid blockchain received");
+                if (!latest) {
+                    console.log("invalid latest received");
                     break;
                 }
                 
-                if (latest.length > 1) {
-                    console.log("expected latest block, received a chain");
+                if (latest !== latestBlock()) {
                     write(ws, QueryChain());
                     break;
                 }
-
-                if (latest[0] !== latestBlock()) {
-                    write(ws, QueryChain());
-                    break;
-                }
-
-                break;
         }
     }); 
 
