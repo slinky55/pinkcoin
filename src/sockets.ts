@@ -55,6 +55,7 @@ export function connectToPeer(p: string): void {
 function write(ws: WebSocket,
                msg: Message): void
 {
+    console.log("Sending:\n" + JSON.stringify(msg));
     ws.send(JSON.stringify(msg));
 }
 
