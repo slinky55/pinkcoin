@@ -19,17 +19,24 @@ export type Message = {
     data: any,
 }
 
-export function LatestMessage(): Message {
+export function SendLatest(): Message {
     return {
         type: MessageType.I_LATEST,
         data: [latestBlock()],
     }
 }
 
-export function ChainMessage(): Message {
+export function QueryChain(): Message {
     return {
         type: MessageType.Q_BLOCKCHAIN,
         data: null,
+    }
+}
+
+export function BroadcastChain(): Message {
+    return {
+        type: MessageType.I_BLOCKCHAIN,
+        data: blockchain,
     }
 }
 
@@ -45,7 +52,7 @@ export function connectToPeer(p: string): void {
     ws.on("open", () => {
         console.log("Connected to node at: " + p);
         initSocket(ws);
-        write(ws, ChainMessage());
+        write(ws, QueryChain());
     });
 
     ws.on("error", () => {
@@ -77,7 +84,7 @@ function initSocket(ws: WebSocket) {
 
         switch (message.type) {
             case MessageType.Q_LATEST:
-                write(ws, LatestMessage());
+                write(ws, SendLatest());
                 break;
             case MessageType.Q_BLOCKCHAIN:
                 write(ws, {
@@ -117,11 +124,11 @@ function initSocket(ws: WebSocket) {
                     if (recLatest.idx > localLatest.idx) {
                         if (localLatest.hash === recLatest.prevHash) {
                             if (addBlock(recLatest)) {
-                                broadcast(LatestMessage())
+                                broadcast(SendLatest())
                             }
                         } else {
                             replaceChain(bc);
-                            broadcast(LatestMessage())
+                            broadcast(SendLatest())
                         }
                     }
                 } catch (e) {
