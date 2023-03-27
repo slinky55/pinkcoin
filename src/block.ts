@@ -6,7 +6,7 @@ const genesis: Block = {
     idx: 0,
     hash: "vyD7PVrzrI81r7yU9BtcAqZycY2qU8Se",
     prevHash: null,
-    timestamp: new Date().getTime() / 1000,
+    timestamp: 	1679927174.443,
     data: "Genesis",
     difficulty: 0,
     nonce: 0,
