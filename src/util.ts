@@ -13,6 +13,14 @@ export function currentTimestamp(): number {
     return Math.round(new Date().getTime() / 1000); 
 } 
 
+export function JSONToObject<T>(data: string): T {
+    try {
+        return JSON.parse(data);
+    } catch(e) {
+        console.log(e);
+        return null;
+    }
+}
 
 export const toBitString = (s: string): string => {
     let ret: string = '';

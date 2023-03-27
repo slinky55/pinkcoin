@@ -55,7 +55,6 @@ export function connectToPeer(p: string): void {
 function write(ws: WebSocket,
                msg: Message): void
 {
-    console.log("Sending:\n" + JSON.stringify(msg));
     ws.send(JSON.stringify(msg));
 }
 
@@ -87,8 +86,7 @@ function initSocket(ws: WebSocket) {
                 break;
             case MessageType.I_BLOCKCHAIN || MessageType.I_LATEST:
                 try {
-                    console.log("got message: \n" + message.data);
-                    const bc: Block[] = JSON.parse(message.data);
+                    const bc: Block[] = message.data;
 
                     if (!bc) {
                         console.log("invalid blockchain recieved"); 
