@@ -33,6 +33,6 @@ app.post("/peers", (req, res) => {
 });
 
 initP2P();
-app.listen(5173, () => {
-  console.log("listening on port 5173");
+app.listen(4200, () => {
+  console.log("listening on port 4200");
 });

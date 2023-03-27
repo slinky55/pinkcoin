@@ -34,11 +34,12 @@ export function connectToPeer(p: string): void {
     const ws: WebSocket = new WebSocket(p);
 
     ws.on("open", () => {
+        console.log("Connected to node at: " + p);
         initSocket(ws);
     });
 
     ws.on("error", () => {
-        console.log("Connection failed from: " + ws.url);
+        console.log("Connection failed at: " + p);
     });
 }
 
