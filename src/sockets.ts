@@ -27,8 +27,8 @@ export function LatestMessage(): Message {
 
 export function ChainMessage(): Message {
     return {
-        type: MessageType.I_BLOCKCHAIN,
-        data: blockchain,
+        type: MessageType.Q_BLOCKCHAIN,
+        data: null,
     }
 }
 
@@ -44,6 +44,7 @@ export function connectToPeer(p: string): void {
     ws.on("open", () => {
         console.log("Connected to node at: " + p);
         initSocket(ws);
+        write(ws, ChainMessage());
     });
 
     ws.on("error", () => {
@@ -123,7 +124,7 @@ function initSocket(ws: WebSocket) {
                         }
                     }
                 } catch (e) {
-                    console.log(e);
+                    console.log("Failed to parse message data: \n" + e);
                 }
                 break;
         }
@@ -131,9 +132,4 @@ function initSocket(ws: WebSocket) {
 
     ws.on("close", () => peers.splice(peers.indexOf(ws), 1));
     ws.on("error", () => peers.splice(peers.indexOf(ws), 1));
-
-    write(ws, {
-        type: MessageType.Q_BLOCKCHAIN,
-        data: null,
-    });
 }
