@@ -87,6 +87,7 @@ function initSocket(ws: WebSocket) {
                 break;
             case MessageType.I_BLOCKCHAIN || MessageType.I_LATEST:
                 try {
+                    console.log("got message: \n" + message.data);
                     const bc: Block[] = JSON.parse(message.data);
 
                     if (!bc) {
