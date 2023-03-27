@@ -36,8 +36,6 @@ export function initP2P() {
     const server: WebSocketServer = new WebSocketServer({port: 4201});
 
     server.on("connection", initSocket);
-
-    connectToPeer("ws://66.42.124.162:4201");
 }
 
 export function connectToPeer(p: string): void {
