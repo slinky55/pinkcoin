@@ -26,6 +26,13 @@ export function SendLatest(): Message {
     }
 }
 
+export function SendChain(): Message {
+    return {
+        type: MessageType.I_BLOCKCHAIN,
+        data: blockchain,
+    }
+}
+
 export function QueryChain(): Message {
     return {
         type: MessageType.Q_BLOCKCHAIN,
@@ -33,10 +40,10 @@ export function QueryChain(): Message {
     }
 }
 
-export function BroadcastChain(): Message {
+export function QueryLatest(): Message {
     return {
-        type: MessageType.I_BLOCKCHAIN,
-        data: blockchain,
+        type: MessageType.Q_LATEST,
+        data: null,
     }
 }
 
@@ -87,53 +94,55 @@ function initSocket(ws: WebSocket) {
                 write(ws, SendLatest());
                 break;
             case MessageType.Q_BLOCKCHAIN:
-                write(ws, {
-                    type: MessageType.I_BLOCKCHAIN,
-                    data: blockchain,
-                })
+                write(ws, SendChain());
                 break;
-            case MessageType.I_BLOCKCHAIN || MessageType.I_LATEST:
-                try {
-                    const bc: Block[] = message.data;
+            case MessageType.I_BLOCKCHAIN:
+                const bc: Block[] = message.data;
 
-                    if (!bc) {
-                        console.log("invalid blockchain recieved"); 
-                        break;
-                    }
+                if (!bc || bc.length === 0) {
+                    console.log("invalid blockchain received");
+                    break;
+                }
 
-                    if (bc.length === 0) {
-                        console.log("error: empty blockchain received");
-                        break;
-                    }
+                const recLatest: Block = bc[bc.length - 1];
+                if (!checkBlockTypes(recLatest)) {
+                    console.log("error: latest block not valid");
+                    break;
+                }
 
-                    const recLatest: Block = bc[bc.length - 1];
-                    if (!checkBlockTypes(recLatest)) {
-                        console.log("error: latest block not valid");
-                        break;
-                    }
-
-                    if (bc.length === 1) {
-                        broadcast({
-                            type: MessageType.Q_BLOCKCHAIN,
-                            data: null,
-                        })
-                        break;
-                    }
-
-                    const localLatest: Block = latestBlock();
-                    if (recLatest.idx > localLatest.idx) {
-                        if (localLatest.hash === recLatest.prevHash) {
-                            if (addBlock(recLatest)) {
-                                broadcast(SendLatest())
-                            }
-                        } else {
-                            replaceChain(bc);
+                const localLatest: Block = latestBlock();
+                if (bc.length > blockchain.length) {
+                    if (localLatest.hash === recLatest.prevHash) {
+                        if (addBlock(recLatest)) {
                             broadcast(SendLatest())
                         }
+                    } else {
+                        replaceChain(bc);
+                        broadcast(SendLatest())
                     }
-                } catch (e) {
-                    console.log("Failed to parse message data: \n" + e);
                 }
+            
+                break;
+
+            case MessageType.I_LATEST:
+                const latest: Block[] = message.data;
+
+                if (!bc || bc.length === 0) {
+                    console.log("invalid blockchain received");
+                    break;
+                }
+                
+                if (latest.length > 1) {
+                    console.log("expected latest block, received a chain");
+                    write(ws, QueryChain());
+                    break;
+                }
+
+                if (latest[0] !== latestBlock()) {
+                    write(ws, QueryChain());
+                    break;
+                }
+
                 break;
         }
     }); 

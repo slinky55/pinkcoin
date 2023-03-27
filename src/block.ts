@@ -115,7 +115,7 @@ export function addBlock(block: Block): boolean {
         blockchain.push(block);
         return true;
     } else {
-        console.log("failed to generate block");
+        console.log("failed to add block");
         return false;
     }
 }
