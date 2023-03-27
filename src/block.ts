@@ -5,7 +5,7 @@ import { checkHash, checkTimestamp, currentTimestamp } from "./util.js";
 const genesis: Block = {
     idx: 0,
     hash: "vyD7PVrzrI81r7yU9BtcAqZycY2qU8Se",
-    prevHash: null,
+    prevHash: "",
     timestamp: 	1679927174.443,
     data: "Genesis",
     difficulty: 0,
@@ -79,7 +79,9 @@ export function checkBlockTypes(block: Block): boolean {
            typeof block.hash === "string" &&
            typeof block.prevHash === "string" &&
            typeof block.timestamp === "number" &&
-           typeof block.data === "string";
+           typeof block.data === "string" &&
+           typeof block.difficulty === "number" &&
+           typeof block.nonce === "number";
 }
 
 export function checkChain(chain: Block[]): boolean {
