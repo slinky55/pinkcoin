@@ -134,6 +134,7 @@ function initSocket(ws: WebSocket) {
                 }
                 
                 if (latest !== latestBlock()) {
+                    console.log("local chain out of sync, requesting blockchain from " + ws.url);
                     write(ws, QueryChain());
                     break;
                 }

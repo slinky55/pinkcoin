@@ -28,6 +28,11 @@ export function latestBlock(): Block {
     return blockchain[blockchain.length - 1];
 }
 
+function compareBlocks(b1: Block, b2: Block): boolean {
+    return (genHashFromBlock(b1) == genHashFromBlock(b2)) &&
+           (b1.hash === b2.hash);
+}
+
 export function genHash(
     idx: number,
     prevHash: string,
@@ -85,7 +90,10 @@ export function checkBlockTypes(block: Block): boolean {
 }
 
 export function checkChain(chain: Block[]): boolean {
-    if (chain[0] !== genesis) {
+    console.log(chain[0]);
+    console.log(genesis);
+
+    if (!compareBlocks(chain[0], genesis)) {
         console.log("Check chain failed, invalid genesis!");
         return false;
     }
