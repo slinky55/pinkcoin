@@ -72,5 +72,7 @@ export function generateBlock(
 }
 
 export function checkBlock(b: Block): boolean {
-    return (checkBlockTypes(b) && checkBlockHash(b))
+    return (checkBlockTypes(b) && 
+            checkBlockHash(b) && 
+            checkHashDiff(b.hash, b.difficulty))
 }

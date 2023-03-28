@@ -44,6 +44,21 @@ export function checkChain(c: Block[]): boolean {
     return true;
 }
 
+export function replaceChain(c: Block[]): boolean {
+    if (!checkChain(c)) {
+        console.log("Replace chain failed, invalid chain");
+        return false;
+    }
+
+    if (c.length <= blockchain.length) {
+        console.log("Replace chain failed, received chain not longer than current.");
+        return false;
+    }
+
+    blockchain = c;
+    return true;
+}
+
 export function addBlock(b: Block): boolean {
     if (!checkBlockTypes(b)) {
         console.log("Failed to add block, invalid block types");
