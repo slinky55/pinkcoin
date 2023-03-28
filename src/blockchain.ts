@@ -1,11 +1,26 @@
-import { Block, checkBlockTypes, checkHash, compareBlocks } from "./block.js";
+import { Block, checkBlock, checkBlockTypes, checkBlockHash, compareBlocks, generateBlock } from "./block.js";
 
 import { GENESIS } from "./genesis.js";
+
+export const MINE_RATE: number = 1000;    // 1 second
+export let DIFF: number = 3;
 
 export let blockchain: Block[] = [GENESIS];
 
 export function latestBlock(): Block {
     return blockchain[blockchain.length - 1];
+}
+
+export function adjustDiff(): void {
+    const difference: number = 
+        latestBlock().timestamp - blockchain[blockchain.length - 2].timestamp;
+    
+    if (difference > MINE_RATE) {
+        if (DIFF === 0) return;
+        DIFF--;
+    } else {
+        DIFF++;
+    }
 }
 
 export function checkChain(c: Block[]): boolean {
@@ -15,13 +30,9 @@ export function checkChain(c: Block[]): boolean {
     }
 
     for (let i = 1; i < c.length; i++) {
-        if (!checkBlockTypes(c[i])) {
-            console.log("Failed to validate hash, found invalid block types");
+        if (!checkBlock(c[i])) {
+            console.log("Failed to validate chain, found invalid block");
             return false;
-        }
-
-        if (!checkHash(c[i])) {
-            console.log("Failed to validate chain, found invalid block hash");
         }
 
         if (c[i].lastHash != c[i - 1].hash) {
@@ -39,7 +50,7 @@ export function addBlock(b: Block): boolean {
         return false;
     }
 
-    if (!checkHash(b)) {
+    if (!checkBlockHash(b)) {
         console.log("Failed to add block, invalid hash");
         return false;
     }
@@ -50,4 +61,15 @@ export function addBlock(b: Block): boolean {
     }
 
     blockchain.push(b);
+    adjustDiff();
+    return true;
 }
+
+export function mineBlock(data: string): Block | null {
+    const block: Block = generateBlock(latestBlock(), data);
+    if (addBlock(block)) {
+        return block;
+    } else {
+        return null;
+    }
+} 
