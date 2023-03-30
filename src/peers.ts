@@ -23,6 +23,7 @@ export function initP2P(): void {
         initSocket(ws);
     })
     console.log("started web socket server on port 4201");
+    broadcast(LatestInfo());
 }
 
 export function initPeer(url: string): void {
