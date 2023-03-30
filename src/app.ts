@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 
 import { blockchain, mineBlock } from "./blockchain.js";
 import { Block } from "./block.js";
-import {initP2P, initPeer, peers} from "./peers.js";
+import {broadcast, ChainQuery, initP2P, initPeer, LatestInfo, peers} from "./peers.js";
 
 const app = express();
 app.use(bodyParser.json())
@@ -27,6 +27,11 @@ app.post("/api/peers", (req, res) => {
   initPeer(peer);
   res.send();
 });
+
+app.get("/api/sync", (req, res) => {
+  broadcast(ChainQuery);
+  res.send();
+})
 
 initP2P();
 
