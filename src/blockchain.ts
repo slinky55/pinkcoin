@@ -1,6 +1,7 @@
 import { Block, checkBlock, checkBlockTypes, checkBlockHash, compareBlocks, generateBlock } from "./block.js";
 
 import { GENESIS } from "./genesis.js";
+import { LatestInfo, broadcast } from "./peers.js";
 
 export const MINE_RATE: number = 1000;    // 1 second
 export let DIFF: number = 3;
@@ -77,6 +78,7 @@ export function addBlock(b: Block): boolean {
 
     blockchain.push(b);
     adjustDiff();
+    broadcast(LatestInfo());
     return true;
 }
 

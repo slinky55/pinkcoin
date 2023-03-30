@@ -1,19 +1,18 @@
 import WebSocket, { WebSocketServer } from "ws";
 import { addBlock, blockchain, checkChain, latestBlock, replaceChain } from "./blockchain.js";
 import { Block, checkBlock, compareBlocks } from "./block.js";
-import e from "express";
 
 export const peers: WebSocket[] = [];
 
-enum MessageType {
+enum PacketType {
     I_CHAIN,
     I_LATEST,
     Q_CHAIN,
     Q_LATEST,
-};
+}
 
 export type Packet = {
-    type: MessageType
+    type: PacketType
     data: any
 }
 
@@ -26,8 +25,65 @@ export function initP2P(): void {
     console.log("started web socket server on port 4201");
 }
 
-function broadcast(p: Packet) {
+export function initPeer(url: string): void {
+    const ws: WebSocket = new WebSocket(url);
+    ws.on("open", () => {
+        initSocket(ws);
+        peers.push(ws);
+        console.log("Connected to " + ws.url);
+    })
+}
 
+export function broadcast(p: Packet) {
+    peers.forEach((ws: WebSocket) => {
+        ws.send(JSON.stringify(p));
+    });
+}
+
+export const ChainInfo = (): Packet => {
+    return {
+        type: PacketType.I_CHAIN,
+        data: blockchain,
+    }
+}
+
+export const LatestInfo = (): Packet => {
+    return {
+        type: PacketType.I_LATEST,
+        data: latestBlock(),
+    }
+}
+
+export const ChainQuery: Packet = {
+    type: PacketType.Q_CHAIN,
+    data: null,
+}
+
+export const LatestQuery: Packet = {
+    type: PacketType.Q_LATEST,
+    data: null,
+}
+
+function initSocket(ws: WebSocket): void {
+    ws.on("message", (data: string) => {
+        try {
+            const message: Packet = JSON.parse(data);
+            if (!message) {
+                console.log("Failed to parse JSON");
+                return;
+            }
+
+            switch (message.type) {
+                case PacketType.I_CHAIN: iChainHandler(ws, message); break;
+                case PacketType.I_LATEST: iLatestHandler(ws, message); break;
+                case PacketType.Q_CHAIN: qChainHandler(ws, message); break;
+                case PacketType.Q_LATEST: qLatestHandler(ws, message); break;
+            }
+
+        } catch (e) {
+            console.log(e);
+        }
+    });
 }
 
 function iChainHandler(ws: WebSocket, p: Packet) {
@@ -78,44 +134,13 @@ function iLatestHandler(ws: WebSocket, p: Packet) {
     }
 
     console.log("Out of sync with " + ws.url + ", querying blockchain");
-    broadcast({
-        type: MessageType.Q_CHAIN,
-        data: null,
-    });
+    broadcast(ChainQuery);
 }
 
 function qChainHandler(ws: WebSocket, p: Packet) {
-    ws.send(JSON.stringify({
-        type: MessageType.I_CHAIN,
-        data: blockchain,
-    }))
+    ws.send(JSON.stringify(ChainInfo()))
 }
 
 function qLatestHandler(ws: WebSocket, p: Packet) {
-    ws.send(JSON.stringify({
-        type: MessageType.I_LATEST,
-        data: latestBlock(),
-    }))
-}
-
-export function initSocket(ws: WebSocket): void {
-    ws.on("message", (data: string) => {
-        try {
-            const message: Packet = JSON.parse(data);
-            if (!message) {
-                console.log("Failed to parse JSON");
-                return;
-            }
-
-            switch (message.type) {
-                case MessageType.I_CHAIN: iChainHandler(ws, message); break;
-                case MessageType.I_LATEST: iLatestHandler(ws, message); break;
-                case MessageType.Q_CHAIN: qChainHandler(ws, message); break;
-                case MessageType.Q_LATEST: qLatestHandler(ws, message); break;
-            }
-
-        } catch (e) {
-            console.log(e);
-        }
-    });
+    ws.send(JSON.stringify(LatestInfo()))
 }
