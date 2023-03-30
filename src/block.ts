@@ -72,7 +72,18 @@ export function generateBlock(
 }
 
 export function checkBlock(b: Block): boolean {
-    return (checkBlockTypes(b) && 
-            checkBlockHash(b) && 
-            checkHashDiff(b.hash, b.difficulty))
+    if (!checkBlockTypes(b)) {
+        console.log("Failed to validate block, invalid block types");
+        return false
+    }
+
+    if (!checkBlockHash(b)) {
+        console.log("Failed to validate block, invalid block hash");
+        return false
+    }
+
+    if (!checkHashDiff(hexToBin(b.hash), b.difficulty)) {
+        console.log("Failed to validate block, invalid hash difficulty");
+        return false
+    }
 }
