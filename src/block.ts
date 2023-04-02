@@ -86,4 +86,6 @@ export function checkBlock(b: Block): boolean {
         console.log("Failed to validate block, invalid hash difficulty");
         return false
     }
+
+    return true;
 }
