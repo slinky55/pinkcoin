@@ -1,6 +1,7 @@
 import WebSocket, { WebSocketServer } from "ws";
 import { addBlock, blockchain, checkChain, latestBlock, replaceChain } from "./blockchain.js";
 import { Block, checkBlock, compareBlocks } from "./block.js";
+import {GENESIS} from "./genesis.js";
 
 export const peers: WebSocket[] = [];
 
@@ -117,6 +118,11 @@ function iChainHandler(ws: WebSocket, p: Packet) {
 
 function iLatestHandler(ws: WebSocket, p: Packet) {
     const latest: Block = p.data;
+
+    if (compareBlocks(latest, GENESIS)) {
+        console.log("Genesis block recieved from " + ws.url);
+        return;
+    }
 
     if (!checkBlock(latest)) {
         console.log("Latest block recieved from " + ws.url + " is invalid");
